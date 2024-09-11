@@ -17,6 +17,7 @@ def start_keyboard():
     )
     return keyboard.as_markup()
 
+
 def catalog_keyboard():
     keyboard = InlineKeyboardBuilder()
     keyboard.max_width = 2
@@ -39,9 +40,23 @@ def profile_keyboard():
             callback_data="deposit_balance"
         ),
         InlineKeyboardButton(
+            text="Реферальная ссылка",
+            callback_data="get_referral_link"
+        ),
+        InlineKeyboardButton(
             text="Вернуться в меню",
             callback_data="start_callback"
         )
     )
     return keyboard.as_markup()
 
+def referral_keyboard():
+    keyboard = InlineKeyboardBuilder()
+    keyboard.max_width = 1
+    keyboard.row(
+        InlineKeyboardButton(
+            text="Вернуться в меню",
+            callback_data="start_callback"
+        )
+    )
+    return keyboard.as_markup()

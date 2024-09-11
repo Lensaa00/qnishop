@@ -11,7 +11,7 @@ def payment_keyboard(amount):
         ),
         InlineKeyboardButton(
             text="Отмена платежа",
-            callback_data="payment_cancel"
+            callback_data="start_callback"
         )
     )
     return keyboard.as_markup()

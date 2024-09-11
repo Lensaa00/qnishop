@@ -11,9 +11,7 @@ dp = Dispatcher()
 async def main():
     dp.include_routers(
         main_handlers.router,
-        payment_handlers.router
-
-    )
+        payment_handlers.router)
     await dp.start_polling(bot)
 
 
