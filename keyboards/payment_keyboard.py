@@ -15,3 +15,14 @@ def payment_keyboard(amount):
         )
     )
     return keyboard.as_markup()
+
+def successful_payment_keyboard():
+    keyboard = InlineKeyboardBuilder()
+    keyboard.max_width=1
+    keyboard.add(
+        InlineKeyboardButton(
+            text=f"Вернуться в меню",
+            callback_data=f"start_callback"
+        )
+    )
+    return keyboard.as_markup()

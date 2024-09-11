@@ -5,6 +5,7 @@ from keyboards import payment_keyboard as pay_kb
 from aiogram.fsm.state import StatesGroup, State
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery, LabeledPrice, PreCheckoutQuery, SuccessfulPayment
+from aiogram.types.message import ContentType
 from aiogram.enums import ParseMode, ContentType
 
 router = Router()
@@ -40,7 +41,7 @@ async def payment_agree_callback(callback: CallbackQuery, state: FSMContext):
     await callback.message.delete()
     query_string = callback.data.split("_")
     amount = int(query_string[2])
-    price = LabeledPrice(label=f"Пополнение баланса на {amount}", amount=amount * 100)
+    price = LabeledPrice(label=f"Пополнение баланса на {amount}", amount=amount*100)
 
     await bot.send_invoice(
         title="Пополнение баланса",
@@ -55,12 +56,14 @@ async def payment_agree_callback(callback: CallbackQuery, state: FSMContext):
 
 @router.pre_checkout_query(lambda query: True)
 async def pre_checkout_query(pre_checkout_q: PreCheckoutQuery):
-
     await bot.answer_pre_checkout_query(pre_checkout_q.id, ok=True)
 
 
-@router.message(F.contains(SuccessfulPayment))
-async def successful_payment(message: Message, state: FSMContext):
+@router.message(F.successful_payment)
+async def successful_payment(message: Message):
+    await bot.delete_message(message.from_user.id, message.message_id - 1)
     await message.answer(
-        text=f"<b>Успешная оплата!</b>\nВы получили {message.successful_payment.total_amount} Руб."
+        text=f"<b>Успешная оплата!</b>\nВы получили {round(message.successful_payment.total_amount/100)} Руб.",
+        parse_mode=ParseMode.HTML,
+        reply_markup=pay_kb.successful_payment_keyboard()
     )
