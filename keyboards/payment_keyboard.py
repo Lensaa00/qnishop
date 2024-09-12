@@ -6,7 +6,7 @@ def payment_keyboard(amount):
     keyboard.max_width=1
     keyboard.add(
         InlineKeyboardButton(
-            text=f"Оплатить {amount}₽",
+            text=f"Оплатить",
             callback_data=f"payment_agree_{amount}"
         ),
         InlineKeyboardButton(

@@ -5,9 +5,8 @@ from handlers.main_handlers import database
 from keyboards import payment_keyboard as pay_kb
 from aiogram.fsm.state import StatesGroup, State
 from aiogram.fsm.context import FSMContext
-from aiogram.types import Message, CallbackQuery, LabeledPrice, PreCheckoutQuery, SuccessfulPayment
-from aiogram.types.message import ContentType
-from aiogram.enums import ParseMode, ContentType
+from aiogram.types import Message, CallbackQuery, LabeledPrice, PreCheckoutQuery
+from aiogram.enums import ParseMode
 
 router = Router()
 bot = Bot(token=config.TOKEN)
@@ -15,6 +14,18 @@ bot = Bot(token=config.TOKEN)
 
 class Payment(StatesGroup):
     amount = State()
+
+
+def check_payment_amount(amount):
+    try:
+        amount = float(amount)
+
+        if 100 <= amount <= 10000:
+            return True
+        else:
+            return False
+    except ValueError:
+        return False
 
 
 @router.callback_query(F.data == "deposit_balance")
@@ -27,14 +38,21 @@ async def deposit_balance_callback(callback: CallbackQuery, state: FSMContext):
 
 @router.message(Payment.amount)
 async def deposit_balance_step2(message: Message, state: FSMContext):
-    await state.update_data(amount=message.text)
-    data = await state.get_data()
-    await state.clear()
-    await message.answer(
-        text=f"<b>Чек создан</b>\nК оплате: {data["amount"]}",
-        reply_markup=pay_kb.payment_keyboard(data["amount"]),
-        parse_mode=ParseMode.HTML
-    )
+    amount = message.text
+    if check_payment_amount(amount):
+        await state.update_data(amount=amount)
+        data = await state.get_data()
+        await state.clear()
+        await message.answer(
+            text=f"<b>Оплата создана</b>\nК оплате: {data['amount']}",
+            reply_markup=pay_kb.payment_keyboard(data["amount"]),
+            parse_mode=ParseMode.HTML
+        )
+    else:
+        await message.answer(
+            text="Сумма должна быть числом от 100 до 10,000. Попробуйте снова.",
+            parse_mode=ParseMode.HTML
+        )
 
 
 @router.callback_query(F.data.contains("payment_agree_"))
@@ -67,7 +85,7 @@ async def successful_payment(message: Message):
     database.update_user_balance(message.chat.id, str(user_balance))
     await bot.delete_message(message.from_user.id, message.message_id - 1)
     await message.answer(
-        text=f"<b>Успешная оплата!</b>\nВы получили {round(message.successful_payment.total_amount / 100)} Руб.",
+        text=f"<b>Успешная оплата!</b>\nВаш баланс пополнен на <b>{round(message.successful_payment.total_amount / 100)} Руб.</b>",
         parse_mode=ParseMode.HTML,
         reply_markup=pay_kb.successful_payment_keyboard()
     )

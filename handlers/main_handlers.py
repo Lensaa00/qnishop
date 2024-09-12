@@ -48,10 +48,11 @@ async def start_callback(callback: CallbackQuery):
 
 @router.callback_query(F.data == "catalog")
 async def catalog_callback(callback: CallbackQuery):
+    categories = database.get_categories()
     await callback.message.edit_text(
         text="<b>Каталог</b>\nВыберите пункт меню:",
         parse_mode=ParseMode.HTML,
-        reply_markup=main_kb.catalog_keyboard()
+        reply_markup=main_kb.catalog_keyboard(categories)
     )
 
 
@@ -60,8 +61,8 @@ async def profile_callback(callback: CallbackQuery):
     user = database.get_user(callback.from_user.id)
     referrals = database.get_user_referrals(callback.from_user.id)
     await callback.message.edit_text(
-        text=f"Профиль <b>{callback.from_user.username.upper()}</b>\nВаши рефералы: {referrals}\nВаш баланс: {user[4]} руб.",
-        parse_mode=ParseMode.HTML,
+        text=f"Профиль *{callback.from_user.username.upper()}*\nВаш ID: *`{user[1]}`*\nВаши рефералы: *{referrals}*\nВаш баланс: *{user[4]} руб*",
+        parse_mode=ParseMode.MARKDOWN_V2,
         reply_markup=main_kb.profile_keyboard()
     )
 

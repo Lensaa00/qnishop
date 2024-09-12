@@ -18,10 +18,16 @@ def start_keyboard():
     return keyboard.as_markup()
 
 
-def catalog_keyboard():
+def catalog_keyboard(categories):
     keyboard = InlineKeyboardBuilder()
     keyboard.max_width = 2
-
+    for category in categories:
+        keyboard.add(
+            InlineKeyboardButton(
+                text=category[1],
+                callback_data=f"category_open_{category[0]}"
+            )
+        )
     keyboard.row(
         InlineKeyboardButton(
             text="Вернуться в меню",
@@ -49,6 +55,7 @@ def profile_keyboard():
         )
     )
     return keyboard.as_markup()
+
 
 def referral_keyboard():
     keyboard = InlineKeyboardBuilder()
