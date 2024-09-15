@@ -17,7 +17,7 @@ def admin_keyboard():
         ),
         InlineKeyboardButton(
             text="Рассылка",
-            callback_data="admin_manage_keyboard"
+            callback_data="admin_advertise"
         ),
         InlineKeyboardButton(
             text="Закрыть меню",
