@@ -19,6 +19,8 @@ bot = Bot(config.TOKEN)
 async def start_command(message: Message, command: CommandObject = None):
     telegram_id = message.from_user.id
     telegram_username = message.from_user.username
+    if telegram_username is None:
+        telegram_username = telegram_id
 
     if command and command.args:
         args = command.args

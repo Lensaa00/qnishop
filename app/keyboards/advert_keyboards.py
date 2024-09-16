@@ -40,7 +40,7 @@ def advert_link(url):
     keyboard.add(
         InlineKeyboardButton(
             text="Открыть ссылку",
-            url=f"{url}"
+            url=url
         )
     )
     return keyboard.as_markup()
