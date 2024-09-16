@@ -1,5 +1,5 @@
 from aiogram import Router, F, Bot
-from aiogram.types import CallbackQuery, Message
+from aiogram.types import CallbackQuery, Message, Update
 from app.database import requests as rq
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.context import FSMContext
@@ -16,6 +16,68 @@ class Advert(StatesGroup):
     image = State()
     text = State()
     url = State()
+
+
+async def send_advert(update: Update, data: dict):
+    if isinstance(update, CallbackQuery):
+        user_id = update.from_user.id
+        message = update.message
+    elif isinstance(update, Message):
+        user_id = update.from_user.id
+        message = update
+    else:
+        raise ValueError("Invalid update type")
+
+    if not data.get("image") and not data.get("text") and not data.get("url"):
+        await message.edit_text("Рассылка отменена, так как все шаги были пропущены.")
+    else:
+        # Рассылка пользователям
+        users = await rq.get_users()
+        print(data)
+        for user in users:
+            # Проверка, есть ли картинка, текст и ссылка
+            if data.get("image") and data.get("text") and data.get("url"):
+                await bot.send_photo(
+                    chat_id=user.telegram_id,
+                    photo=data.get("image"),
+                    caption=data.get("text"),
+                    parse_mode=ParseMode.HTML,
+                    reply_markup=ad_kb.advert_link(data.get("url"))
+                )
+            # Проверка, есть ли картинка и текст (без ссылки)
+            elif data.get("image") and data.get("text"):
+                await bot.send_photo(
+                    chat_id=user.telegram_id,
+                    photo=data.get("image"),
+                    caption=data.get("text"),
+                    parse_mode=ParseMode.HTML
+                )
+            # Проверка, есть ли текст и ссылка (без картинки)
+            elif data.get("text") and data.get("url"):
+                await bot.send_message(
+                    chat_id=user.telegram_id,
+                    text=data.get("text"),
+                    parse_mode=ParseMode.HTML,
+                    reply_markup=ad_kb.advert_link(data.get("url"))
+                )
+            # Проверка, есть ли только текст
+            elif data.get("text"):
+                await bot.send_message(
+                    chat_id=user.telegram_id,
+                    text=data.get("text"),
+                    parse_mode=ParseMode.HTML
+                )
+            # Проверка, есть ли только картинка
+            elif data.get("image"):
+                await bot.send_photo(
+                    chat_id=user.telegram_id,
+                    photo=data.get("image")
+                )
+            # Если нет ни текста, ни картинки
+            else:
+                await message.edit_text(
+                    text="Ошибка в отправке рассылки\nПроверьте вводимые данные и попробуйте снова."
+                )
 
 
 @router.callback_query(F.data == "admin_advertise")
@@ -68,34 +130,7 @@ async def advert_url_step(message: Message, state: FSMContext):
     if user.is_admin:
         await state.update_data(url=message.text)
         data = await state.get_data()
-
-        # Проверка на наличие хотя бы одного шага
-        if not data.get("image") and not data.get("text") and not data.get("url"):
-            await message.answer("Рассылка отменена, так как все шаги были пропущены.")
-            await state.clear()
-            return
-
-        # Рассылка пользователям
-        users = await rq.get_users()
-        for user in users:
-            if data.get("image") and data.get("text"):
-                await bot.send_photo(
-                    user.telegram_id,
-                    data["image"],
-                    caption=data["text"],
-                    reply_markup=ad_kb.advert_link(data["url"])
-                )
-            elif data.get("text"):
-                await bot.send_message(
-                    user.telegram_id,
-                    data["text"],
-                    reply_markup=ad_kb.advert_link(data["url"])
-                )
-            elif data.get("image"):
-                await bot.send_photo(
-                    user.telegram_id,
-                    data["image"]
-                )
+        await send_advert(message, data)
         await state.clear()
 
 
@@ -130,30 +165,5 @@ async def skip_step_url_callback(callback: CallbackQuery, state: FSMContext):
         await state.update_data(url=None)
         data = await state.get_data()
 
-        # Проверка на наличие хотя бы одного шага перед отправкой
-        if not data.get("image") and not data.get("text") and not data.get("url"):
-            await callback.message.answer("Рассылка отменена, так как все шаги были пропущены.")
-            await state.clear()
-        else:
-            # Рассылка пользователям
-            users = await rq.get_users()
-            for user in users:
-                if data.get("image") and data.get("text"):
-                    await bot.send_photo(
-                        user.telegram_id,
-                        data["image"],
-                        caption=data["text"],
-                        reply_markup=ad_kb.advert_link(data["url"])
-                    )
-                elif data.get("text"):
-                    await bot.send_message(
-                        user.telegram_id,
-                        data["text"],
-                        reply_markup=ad_kb.advert_link(data["url"])
-                    )
-                elif data.get("image"):
-                    await bot.send_photo(
-                        user.telegram_id,
-                        data["image"]
-                    )
-            await state.clear()
+        await send_advert(callback, data)
+        await state.clear()

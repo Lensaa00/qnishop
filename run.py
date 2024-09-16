@@ -2,7 +2,6 @@ import asyncio
 from aiogram import Bot, Dispatcher
 
 from app.handlers import menu_handlers, advert_handlers, admin_handlers
-
 from app.database.models import async_main
 from config import TOKEN
 
