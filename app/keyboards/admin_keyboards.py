@@ -34,15 +34,15 @@ def admin_rights_keyboard():
     keyboard.add(
         InlineKeyboardButton(
             text="Список администраторов",
-            callback_data="admin_rights_list"
+            callback_data="admin_manage_rights_admin_list"
         ),
         InlineKeyboardButton(
             text="Добавить администратора",
-            callback_data="admin_rights_add_admin"
+            callback_data="admin_manage_rights_admin_add"
         ),
         InlineKeyboardButton(
             text="Удалить администратора",
-            callback_data="admin_rights_remove_admin"
+            callback_data="admin_manage_rights_admin_remove"
         ),
         InlineKeyboardButton(
             text="Назад",

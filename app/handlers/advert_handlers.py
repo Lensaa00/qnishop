@@ -75,9 +75,10 @@ async def send_advert(update: Update, data: dict):
                 )
             # Если нет ни текста, ни картинки
             else:
-                await message.edit_text(
+                await message.answer(
                     text="Ошибка в отправке рассылки\nПроверьте вводимые данные и попробуйте снова."
                 )
+                return
 
 
 @router.callback_query(F.data == "admin_advertise")

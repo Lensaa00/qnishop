@@ -1,10 +1,7 @@
-from ast import parse
-from types import NoneType
-
 from aiogram import Bot, Router, F
 from aiogram.enums import ParseMode
-from aiogram.types import Message, CallbackQuery, LabeledPrice, PreCheckoutQuery
 from aiogram.filters import CommandStart, CommandObject
+from aiogram.types import Message, CallbackQuery, LabeledPrice, PreCheckoutQuery
 from aiogram.utils.deep_linking import create_start_link, decode_payload
 
 import config
