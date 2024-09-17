@@ -114,7 +114,8 @@ async def advert_text_step(message: Message, state: FSMContext):
     user = await rq.get_user(message.from_user.id)
     if user.is_admin:
         if message.text:
-            await state.update_data(text=message.text.replace("!", "").replace(".", ""))
+            # await state.update_data(text=message.text.replace("!", "").replace(".", ""))
+            await state.update_data(text=message.text)
         else:
             await message.answer("Пожалуйста, отправьте текст.")
             return

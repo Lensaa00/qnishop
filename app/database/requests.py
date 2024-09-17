@@ -34,9 +34,22 @@ async def get_user(telegram_id):
     async with async_session() as session:
         return await session.scalar(select(User).where(User.telegram_id == telegram_id))
 
+# получение всех пользователей
 async def get_users():
     async with async_session() as session:
         return await session.scalars(select(User).order_by(User.telegram_id))
+
+# добавление пользователя в группу администраторов
+async def user_add_admin(telegram_id):
+    async with async_session() as session:
+        await session.execute(update(User).where(User.telegram_id == telegram_id).values(is_admin = 1))
+        await session.commit()
+
+# удаление пользователя из группу администраторов
+async def user_remove_admin(telegram_id):
+    async with async_session() as session:
+        await session.execute(update(User).where(User.telegram_id == telegram_id).values(is_admin = 0))
+        await session.commit()
 
 
 # КАТЕГОРИИ
